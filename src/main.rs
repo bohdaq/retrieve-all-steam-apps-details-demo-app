@@ -4,7 +4,7 @@ use std::{thread, time};
 use std::io::Write;
 
 // How to use: 1. First step is to import crate functions.
-use steam_webapi_rust_sdk::{get_app_list, get_cached_app_details};
+use steam_webapi_rust_sdk::{get_app_list, get_app_details};
 use steam_webapi_rust_sdk::isteam_apps::get_app_list::SteamApp;
 use steam_webapi_rust_sdk::util::get_cache_dir_path;
 
@@ -66,7 +66,7 @@ fn main() {
 
 fn retrieve_detailed_app_info(app_id: i64) {
     // How to use: 3. Getting app details from Steam store.
-    let boxed_result = get_cached_app_details(app_id);
+    let boxed_result = get_app_details(app_id);
     if boxed_result.is_ok() {
         let app_details = boxed_result.unwrap();
         println!("result is ok for {} app id {}", app_details.name, app_details.app_id);
