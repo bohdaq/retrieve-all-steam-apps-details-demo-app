@@ -9,5 +9,5 @@ license = "MIT OR Apache-2.0 OR ISC OR LGPL-3.0-or-later OR CC-BY-4.0"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-steam-webapi-rust-sdk = "0.0.4"
+steam-webapi-rust-sdk = "0.0.7"
 serde_json = { version="1.0.82" }
