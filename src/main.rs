@@ -16,12 +16,11 @@ fn main() {
 
 fn do_job() {
     // How to use: 2. Getting app list from Steam store.
-    let app_list = get_app_list().unwrap();
-    let mut iteration_number = 1;
-    let app_list_size = app_list.len();
+
 
     let mut processed_app_id_list: Vec<i64> = vec![];
 
+    println!("Getting list of already processed app ids. This may take a while...");
     let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
     let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
     let file_exists = Path::new(already_processed_app_id_list_path.as_str()).is_file();
@@ -54,6 +53,8 @@ fn do_job() {
 
     println!("Filtering already processed app details. This may take a while...");
     let mut iteration = 0;
+    let app_list = get_app_list().unwrap();
+    let app_list_size = app_list.len();
     let filtered_list: Vec<SteamApp> = app_list
         .into_iter()
         .filter(|steam_app| {
@@ -66,7 +67,7 @@ fn do_job() {
 
     let filtered_list_len = filtered_list.len();
 
-
+    let mut iteration_number = 1;
     for app in filtered_list {
         let mut file = OpenOptions::new()
             .read(true)
