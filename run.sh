@@ -7,11 +7,11 @@ do
 	rm out.log
 	touch out.log
 	echo "killing previously started instance PID"
-	killall retrieve-all-steam-apps-details-demo-app
+	killall retrieve-all-steam-apps-details-demo-app >> out.log &
 	cargo run >> out.log &
 	echo "started app with PID $!, output redirected to out.log"
-	echo "instance will be restarted in 600s"
+	echo "instance will be restarted in 300s"
 	echo "end of iteration $i"
 	let i++
-	sleep 600
+	sleep 300
 done
