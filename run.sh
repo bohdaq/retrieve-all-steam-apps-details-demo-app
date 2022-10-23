@@ -4,8 +4,7 @@ PID=0
 while true
 do
 	echo "\n\niteration $i"
-	rm out.log
-	touch out.log
+	echo "" > out.log
 	echo "killing previously started instance PID"
 	killall retrieve-all-steam-apps-details-demo-app >> out.log &
 	cargo run >> out.log &
