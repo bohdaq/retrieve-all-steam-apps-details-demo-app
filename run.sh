@@ -7,10 +7,13 @@ do
 	echo "" > out.log
 	echo "killing previously started instance PID"
 	killall retrieve-all-steam-apps-details-demo-app >> out.log &
+	touch stop.sh
+	sh stop.sh
+	echo "kill -9 $!" > stop.sh
 	cargo run >> out.log &
 	echo "started app with PID $!, output redirected to out.log"
-	echo "instance will be restarted in 900s"
+	echo "instance will be restarted in 1500s"
 	echo "end of iteration $i"
 	let i++
-	sleep 900
+	sleep 1500
 done
