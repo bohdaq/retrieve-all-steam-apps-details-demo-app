@@ -1,5 +1,6 @@
 i=0
 PID=0
+RESTART_AT_IN_SECONDS=900
 
 while true
 do
@@ -12,8 +13,8 @@ do
 	cargo run >> out.log &
 	echo "kill -9 $!" > stop.sh
 	echo "started app with PID $!, output redirected to out.log"
-	echo "instance will be restarted in 1500s"
+	echo "instance will be restarted in $RESTART_AT_IN_SECONDS seconds"
 	echo "end of iteration $i"
 	let i++
-	sleep 1500
+	sleep $RESTART_AT_IN_SECONDS
 done
