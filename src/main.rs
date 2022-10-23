@@ -1,6 +1,6 @@
 use std::fs::{File, OpenOptions, read_to_string};
 use std::path::Path;
-use std::{thread, time};
+use std::{fs, thread, time};
 use std::io::Write;
 
 // How to use: 1. First step is to import crate functions.
@@ -11,6 +11,10 @@ use steam_webapi_rust_sdk::util::get_cache_dir_path;
 fn main() {
     println!("retrieve-all-steam-apps-details-demo-app");
 
+   do_job()
+}
+
+fn do_job() {
     // How to use: 2. Getting app list from Steam store.
     let app_list = get_app_list().unwrap();
     let mut iteration_number = 1;
@@ -19,11 +23,30 @@ fn main() {
     let mut processed_app_id_list: Vec<i64> = vec![];
 
     let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
+    let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
     let file_exists = Path::new(already_processed_app_id_list_path.as_str()).is_file();
     if file_exists {
         let serialized_string = read_to_string(&already_processed_app_id_list_path).unwrap();
         if serialized_string.len() > 0 {
-            processed_app_id_list = serde_json::from_str(serialized_string.as_str()).unwrap();
+            let boxed_processed_app_id_list = serde_json::from_str(serialized_string.as_str());
+            if boxed_processed_app_id_list.is_ok() {
+                processed_app_id_list = boxed_processed_app_id_list.unwrap();
+                let boxed_backup = fs::copy(&already_processed_app_id_list_path, &backup_already_processed_app_id_list_path);
+                if boxed_backup.is_err() {
+                    println!("backup creation failed, exiting...");
+                    return;
+                } else {
+                    println!("backup done.")
+                }
+            } else {
+                let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
+                if boxed_backup_restore.is_err() {
+                    println!("backup restore failed, exiting...");
+                    return;
+                }
+                //retry after backup restore
+                do_job();
+            }
         }
     } else {
         File::create(&already_processed_app_id_list_path).unwrap();
