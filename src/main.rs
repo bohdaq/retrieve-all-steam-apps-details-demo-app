@@ -58,7 +58,7 @@ fn do_job() {
         .into_iter()
         .filter(|steam_app| {
             iteration = iteration + 1;
-            println!("Iteration {} of {}", iteration, app_list_size);
+            print!("\rFiltering already processed apps. Iteration {} of {}", iteration, app_list_size);
             !processed_app_id_list.contains(&steam_app.appid)
 
         })
