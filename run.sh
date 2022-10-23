@@ -9,8 +9,8 @@ do
 	killall retrieve-all-steam-apps-details-demo-app >> out.log &
 	touch stop.sh
 	sh stop.sh
-	echo "kill -9 $!" > stop.sh
 	cargo run >> out.log &
+	echo "kill -9 $!" > stop.sh
 	echo "started app with PID $!, output redirected to out.log"
 	echo "instance will be restarted in 1500s"
 	echo "end of iteration $i"
