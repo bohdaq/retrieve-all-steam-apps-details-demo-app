@@ -56,38 +56,13 @@ fn do_job() {
                 }
 
                 if sha_256 != sha256_from_file {
-                    println!("restoring from backup as SHAs do not match");
-                    let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
-                    if boxed_backup_restore.is_err() {
-                        println!("backup restore failed, exiting...");
-                        return;
-                    }
-
-                    let boxed_backup_restore_sha256 = fs::copy(&backup_already_processed_app_id_list_path_sha_256, &already_processed_app_id_list_path_sha_256);
-                    if boxed_backup_restore_sha256.is_err() {
-                        println!("backup sha256 restore failed, exiting...");
-                        return;
-                    }
+                    do_restore_from_backup();
                     //retry after backup restore
                     do_job();
                 }
-
-
-
                 do_backup();
             } else {
-                let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
-                if boxed_backup_restore.is_err() {
-                    println!("backup restore failed, exiting...");
-                    return;
-                }
-
-                let boxed_backup_restore_sha256 = fs::copy(&backup_already_processed_app_id_list_path_sha_256, &already_processed_app_id_list_path_sha_256);
-                if boxed_backup_restore_sha256.is_err() {
-                    println!("backup sha256 restore failed, exiting...");
-                    return;
-                }
-                //retry after backup restore
+                do_restore_from_backup();
                 do_job();
             }
         }
@@ -195,5 +170,25 @@ fn do_backup() {
         return;
     } else {
         println!("backup sha256 done.")
+    }
+}
+
+fn do_restore_from_backup() {
+    let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
+    let already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json.sha256".to_string()].join("");
+    let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
+    let backup_already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json.sha256".to_string()].join("");
+
+
+    let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
+    if boxed_backup_restore.is_err() {
+        println!("backup restore failed, exiting...");
+        return;
+    }
+
+    let boxed_backup_restore_sha256 = fs::copy(&backup_already_processed_app_id_list_path_sha_256, &already_processed_app_id_list_path_sha_256);
+    if boxed_backup_restore_sha256.is_err() {
+        println!("backup sha256 restore failed, exiting...");
+        return;
     }
 }
