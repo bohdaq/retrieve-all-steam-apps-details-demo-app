@@ -25,6 +25,7 @@ fn do_job() {
     let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
     let already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json.sha256".to_string()].join("");
     let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
+    let backup_already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json.sha256".to_string()].join("");
     let file_exists = Path::new(already_processed_app_id_list_path.as_str()).is_file();
     if file_exists {
         let serialized_string = read_to_string(&already_processed_app_id_list_path).unwrap();
@@ -61,6 +62,12 @@ fn do_job() {
                         println!("backup restore failed, exiting...");
                         return;
                     }
+
+                    let boxed_backup_restore_sha256 = fs::copy(&backup_already_processed_app_id_list_path_sha_256, &already_processed_app_id_list_path_sha_256);
+                    if boxed_backup_restore_sha256.is_err() {
+                        println!("backup sha256 restore failed, exiting...");
+                        return;
+                    }
                     //retry after backup restore
                     do_job();
                 }
@@ -74,10 +81,24 @@ fn do_job() {
                 } else {
                     println!("backup done.")
                 }
+
+                let boxed_backup_sha256 = fs::copy(&already_processed_app_id_list_path_sha_256, &backup_already_processed_app_id_list_path_sha_256);
+                if boxed_backup_sha256.is_err() {
+                    println!("backup for sha256 creation failed, exiting...");
+                    return;
+                } else {
+                    println!("backup sha256 done.")
+                }
             } else {
                 let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
                 if boxed_backup_restore.is_err() {
                     println!("backup restore failed, exiting...");
+                    return;
+                }
+
+                let boxed_backup_restore_sha256 = fs::copy(&backup_already_processed_app_id_list_path_sha_256, &already_processed_app_id_list_path_sha_256);
+                if boxed_backup_restore_sha256.is_err() {
+                    println!("backup sha256 restore failed, exiting...");
                     return;
                 }
                 //retry after backup restore
