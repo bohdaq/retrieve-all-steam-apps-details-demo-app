@@ -205,13 +205,13 @@ fn do_restore_from_backup() {
 
     let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
     if boxed_backup_restore.is_err() {
-        println!("backup restore failed, exiting...");
+        println!("backup restore for processed already apps failed, exiting...");
         return;
     }
 
     let boxed_backup_restore_sha256 = fs::copy(&backup_already_processed_app_id_list_path_sha_256, &already_processed_app_id_list_path_sha_256);
     if boxed_backup_restore_sha256.is_err() {
-        println!("backup sha256 restore failed, exiting...");
+        println!("backup sha256 restore for processed already apps failed, exiting...");
         return;
     }
 
