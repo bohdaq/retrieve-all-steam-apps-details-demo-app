@@ -177,7 +177,7 @@ fn do_backup() {
         println!("backup for app list creation failed, exiting...");
         return;
     } else {
-        println!("backup for app list sha256 done.")
+        println!("backup for app list done.")
     }
 
     let boxed_backup_app_list_sha256 = fs::copy(&app_list_path_sha_256, &backup_app_list_path_sha_256);
