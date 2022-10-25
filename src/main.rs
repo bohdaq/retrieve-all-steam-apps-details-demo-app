@@ -24,8 +24,6 @@ fn do_job() {
     println!("Getting list of already processed app ids. This may take a while...");
     let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
     let already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json.sha256".to_string()].join("");
-    let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
-    let backup_already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json.sha256".to_string()].join("");
     let file_exists = Path::new(already_processed_app_id_list_path.as_str()).is_file();
     if file_exists {
         let serialized_string = read_to_string(&already_processed_app_id_list_path).unwrap();
@@ -73,6 +71,12 @@ fn do_job() {
     println!("Filtering already processed app details. This may take a while...");
     let mut iteration = 0;
     let app_list = get_app_list().unwrap();
+    let app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
+    let list_as_string: String = format!("{:?}", &app_list);
+    let list_as_u8 : &[u8] = list_as_string.as_bytes();
+    let digest = write_sha256(&app_list_path_sha_256, list_as_u8);
+    println!("Written SHA256 for the app list: {}", digest);
+
     let app_list_size = app_list.len();
     let filtered_list: Vec<SteamApp> = app_list
         .into_iter()
@@ -105,21 +109,10 @@ fn do_job() {
         let serialized_list = serde_json::to_string(&processed_app_id_list).unwrap();
         file.write_all(serialized_list.as_ref()).unwrap();
 
-
-        //write sha256
-        let mut file = OpenOptions::new()
-            .read(true)
-            .write(true)
-            .create(true)
-            .truncate(false)
-            .open(&already_processed_app_id_list_path_sha_256)
-            .unwrap();
-
         let list_as_string: String = format!("{:?}", &processed_app_id_list);
         let list_as_u8 : &[u8] = list_as_string.as_bytes();
-        let sha256_from_list = digest(list_as_u8);
-        file.write_all(sha256_from_list.as_ref()).unwrap();
-        println!("SHA256 after write for the list of already processed app ids: {}", sha256_from_list);
+        let digest = write_sha256(&already_processed_app_id_list_path_sha_256, list_as_u8);
+        println!("SHA256 after write for the list of already processed app ids: {}", digest);
     }
 }
 
@@ -152,8 +145,15 @@ fn retrieve_detailed_app_info(app_id: i64) {
 fn do_backup() {
     let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
     let already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json.sha256".to_string()].join("");
+
     let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
     let backup_already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json.sha256".to_string()].join("");
+
+    let app_list_path = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json".to_string()].join("");
+    let app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
+
+    let backup_app_list_path = [get_cache_dir_path(), "/".to_string(), "backup_ISteamApps-GetAppList-v2.json".to_string()].join("");
+    let backup_app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
 
 
     let boxed_backup = fs::copy(&already_processed_app_id_list_path, &backup_already_processed_app_id_list_path);
@@ -176,8 +176,15 @@ fn do_backup() {
 fn do_restore_from_backup() {
     let already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json".to_string()].join("");
     let already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "processed_app_id_list.json.sha256".to_string()].join("");
+
     let backup_already_processed_app_id_list_path = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json".to_string()].join("");
     let backup_already_processed_app_id_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_processed_app_id_list.json.sha256".to_string()].join("");
+
+    let app_list_path = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json".to_string()].join("");
+    let app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
+
+    let backup_app_list_path = [get_cache_dir_path(), "/".to_string(), "backup_ISteamApps-GetAppList-v2.json".to_string()].join("");
+    let backup_app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "backup_ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
 
 
     let boxed_backup_restore = fs::copy(&backup_already_processed_app_id_list_path, &already_processed_app_id_list_path);
@@ -191,4 +198,18 @@ fn do_restore_from_backup() {
         println!("backup sha256 restore failed, exiting...");
         return;
     }
+}
+
+fn write_sha256(path: &String, data: &[u8]) -> String {
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .truncate(false)
+        .open(path)
+        .unwrap();
+
+    let sha256_from_list = digest(data);
+    file.write_all(sha256_from_list.as_ref()).unwrap();
+    sha256_from_list
 }
