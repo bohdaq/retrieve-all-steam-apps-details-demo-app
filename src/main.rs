@@ -5,7 +5,7 @@ use std::io::{Read, Write};
 use sha256::digest;
 
 // How to use: 1. First step is to import crate functions.
-use steam_webapi_rust_sdk::{get_app_list, get_app_details};
+use steam_webapi_rust_sdk::{get_app_list, get_app_details, get_cached_app_list};
 use steam_webapi_rust_sdk::isteam_apps::get_app_list::SteamApp;
 use steam_webapi_rust_sdk::util::get_cache_dir_path;
 
@@ -58,8 +58,8 @@ fn do_job() {
                     //retry after backup restore
                     do_job();
                 }
-                do_backup();
             } else {
+                println!("unable to deserialize processed app list");
                 do_restore_from_backup();
                 do_job();
             }
@@ -70,7 +70,7 @@ fn do_job() {
 
     println!("Filtering already processed app details. This may take a while...");
     let mut iteration = 0;
-    let app_list = get_app_list().unwrap();
+    let mut app_list : Vec<SteamApp> = get_steam_app_list();
     let app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
     let list_as_string: String = format!("{:?}", &app_list);
     let list_as_u8 : &[u8] = list_as_string.as_bytes();
@@ -240,4 +240,16 @@ fn write_sha256(path: &String, data: &[u8]) -> String {
     let sha256_from_list = digest(data);
     file.write_all(sha256_from_list.as_ref()).unwrap();
     sha256_from_list
+}
+
+fn get_steam_app_list() -> Vec<SteamApp> {
+    let mut app_list : Vec<SteamApp>;
+    let boxed_cached_app_list = get_cached_app_list();
+    if boxed_cached_app_list.is_ok() {
+        app_list = boxed_cached_app_list.unwrap();
+    } else {
+        app_list = get_app_list().unwrap();
+    }
+
+    app_list
 }
