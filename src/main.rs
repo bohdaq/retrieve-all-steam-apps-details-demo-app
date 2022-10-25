@@ -171,6 +171,22 @@ fn do_backup() {
     } else {
         println!("backup sha256 done.")
     }
+
+    let boxed_backup_app_list = fs::copy(&app_list_path, &backup_app_list_path);
+    if boxed_backup_app_list.is_err() {
+        println!("backup for app list creation failed, exiting...");
+        return;
+    } else {
+        println!("backup for app list sha256 done.")
+    }
+
+    let boxed_backup_app_list_sha256 = fs::copy(&app_list_path_sha_256, &backup_app_list_path_sha_256);
+    if boxed_backup_app_list_sha256.is_err() {
+        println!("backup for app list sha256 creation failed, exiting...");
+        return;
+    } else {
+        println!("backup for app list sha256 done.")
+    }
 }
 
 fn do_restore_from_backup() {
