@@ -214,6 +214,18 @@ fn do_restore_from_backup() {
         println!("backup sha256 restore failed, exiting...");
         return;
     }
+
+    let boxed_backup_restore_app_list = fs::copy(&backup_app_list_path, &app_list_path);
+    if boxed_backup_restore_app_list.is_err() {
+        println!("backup applist restore failed, exiting...");
+        return;
+    }
+
+    let boxed_backup_restore_app_list_sha256 = fs::copy(&backup_app_list_path_sha_256, &app_list_path_sha_256);
+    if boxed_backup_restore_app_list_sha256.is_err() {
+        println!("backup applist sha256 restore failed, exiting...");
+        return;
+    }
 }
 
 fn write_sha256(path: &String, data: &[u8]) -> String {
