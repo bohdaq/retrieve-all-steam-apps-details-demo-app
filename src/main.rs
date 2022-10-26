@@ -276,7 +276,12 @@ fn get_or_create_passphrase() -> Result<String, String> {
             return Err(message)
         }
         let passphrase = boxed_passphrase.unwrap();
-        write_file(passphrase_path, passphrase.as_bytes());
+
+        let boxed_write = write_file(passphrase_path, passphrase.as_bytes());
+        if boxed_write.is_err() {
+            let message = boxed_write.err().unwrap();
+            return Err(message)
+        }
         Ok(passphrase)
     }
 
@@ -316,7 +321,7 @@ fn read_file(path: &str) -> String {
     file_contents
 }
 
-fn write_file(path: &str, file_content: &[u8]) {
+fn write_file(path: &str, file_content: &[u8]) -> Result<(), String> {
     let mut file = OpenOptions::new()
         .read(false)
         .write(true)
@@ -326,8 +331,10 @@ fn write_file(path: &str, file_content: &[u8]) {
         .unwrap();
     let boxed_write = file.write_all(file_content);
     if boxed_write.is_err() {
-        println!("unable to write to file: {}", boxed_write.err().unwrap());
+        let message = format!("unable to write to file: {}", boxed_write.err().unwrap());
+        return Err(message)
     }
+    Ok(())
 }
 
 fn overwrite_file(path: &str, file_content: &[u8]) -> Result<(), String>{
