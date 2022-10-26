@@ -342,5 +342,6 @@ fn generate_passphrase() -> String {
     let now = SystemTime::now();
     let time_in_millis = now.duration_since(UNIX_EPOCH).unwrap().as_nanos();
     let hex_time_in_millis = format!("{time_in_millis:X}");
-    hex_time_in_millis
+    let sha_timestamp = digest(hex_time_in_millis);
+    sha_timestamp
 }
