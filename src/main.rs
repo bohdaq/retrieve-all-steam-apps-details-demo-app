@@ -253,3 +253,55 @@ fn get_steam_app_list() -> Vec<SteamApp> {
 
     app_list
 }
+
+fn setup_encryption() {
+    let boxed_passphrase = get_or_create_passphrase();
+}
+
+fn get_or_create_passphrase() -> Result<String, String> {
+    let passphrase_path = ".passphrase";
+
+    let does_passphrase_exist = does_file_exist(passphrase_path);
+    return if does_passphrase_exist {
+        let passphrase = read_file(passphrase_path);
+        Ok(passphrase)
+    } else {
+        create_file(passphrase_path);
+        Ok("passphrase".to_string())
+    }
+
+}
+
+fn create_file(path: &str)  {
+    OpenOptions::new()
+        .read(false)
+        .write(false)
+        .create(true)
+        .truncate(false)
+        .open(path)
+        .unwrap();
+}
+
+fn does_file_exist(path: &str) -> bool {
+    let file_exists = Path::new(path).is_file();
+    file_exists
+}
+
+fn read_file(path: &str) -> String {
+    let mut file_contents : String = "".to_string();
+
+    let mut file = OpenOptions::new()
+        .read(true)
+        .write(false)
+        .create(false)
+        .truncate(false)
+        .open(path)
+        .unwrap();
+
+    let boxed_read = file.read_to_string(&mut file_contents);
+    if boxed_read.is_err() {
+        println!("unable to read from file: {}", boxed_read.err().unwrap());
+    }
+
+    file_contents
+}
