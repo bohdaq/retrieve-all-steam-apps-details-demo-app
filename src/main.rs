@@ -1,6 +1,7 @@
 use std::fs::{File, OpenOptions, read_to_string};
 use std::path::Path;
 use std::{fs, thread, time};
+use std::f32::consts::E;
 use std::io::{Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
@@ -269,7 +270,12 @@ fn get_or_create_passphrase() -> Result<String, String> {
         Ok(passphrase)
     } else {
         create_file(passphrase_path);
-        let passphrase = generate_passphrase();
+        let boxed_passphrase = generate_passphrase();
+        if boxed_passphrase.is_err() {
+            let message = boxed_passphrase.err().unwrap();
+            return Err(message)
+        }
+        let passphrase = boxed_passphrase.unwrap();
         write_file(passphrase_path, passphrase.as_bytes());
         Ok(passphrase)
     }
@@ -340,10 +346,15 @@ fn overwrite_file(path: &str, file_content: &[u8]) -> Result<(), String>{
     Ok(())
 }
 
-fn generate_passphrase() -> String {
+fn generate_passphrase() -> Result<String, String> {
     let now = SystemTime::now();
-    let time_in_millis = now.duration_since(UNIX_EPOCH).unwrap().as_nanos();
+    let boxed_time_in_millis = now.duration_since(UNIX_EPOCH);
+    if boxed_time_in_millis.is_err() {
+        let message = format!("unable to get system time: {}", boxed_time_in_millis.err().unwrap());
+        return Err(message)
+    }
+    let time_in_millis = boxed_time_in_millis.unwrap().as_nanos();
     let hex_time_in_millis = format!("{time_in_millis:X}");
     let sha_timestamp = digest(hex_time_in_millis);
-    sha_timestamp
+    Ok(sha_timestamp)
 }
