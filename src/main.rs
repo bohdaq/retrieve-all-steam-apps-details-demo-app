@@ -269,7 +269,12 @@ fn get_or_create_passphrase() -> Result<String, String> {
         let passphrase = read_file(passphrase_path);
         Ok(passphrase)
     } else {
-        create_file(passphrase_path);
+        let boxed_create = create_file(passphrase_path);
+        if boxed_create.is_err() {
+            let message = boxed_create.err().unwrap();
+            return Err(message)
+        }
+
         let boxed_passphrase = generate_passphrase();
         if boxed_passphrase.is_err() {
             let message = boxed_passphrase.err().unwrap();
@@ -287,14 +292,20 @@ fn get_or_create_passphrase() -> Result<String, String> {
 
 }
 
-fn create_file(path: &str)  {
-    OpenOptions::new()
+fn create_file(path: &str) -> Result<File, String>  {
+    let boxed_file = OpenOptions::new()
         .read(false)
         .write(false)
         .create(true)
         .truncate(false)
-        .open(path)
-        .unwrap();
+        .open(path);
+
+    if boxed_file.is_err() {
+        let message = format!("unable to create file: {}", boxed_file.err().unwrap());
+        return Err(message)
+    }
+
+    Ok(file)
 }
 
 fn does_file_exist(path: &str) -> bool {
