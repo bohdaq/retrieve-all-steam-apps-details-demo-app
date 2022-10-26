@@ -324,7 +324,7 @@ fn write_file(path: &str, file_content: &[u8]) {
     }
 }
 
-fn overwrite_file(path: &str, file_content: &[u8]) {
+fn overwrite_file(path: &str, file_content: &[u8]) -> Result<(), String>{
     let mut file = OpenOptions::new()
         .read(false)
         .write(true)
@@ -334,8 +334,10 @@ fn overwrite_file(path: &str, file_content: &[u8]) {
         .unwrap();
     let boxed_write = file.write_all(file_content);
     if boxed_write.is_err() {
-        println!("unable to overwrite to file: {}", boxed_write.err().unwrap());
+        let message = format!("unable to overwrite to file: {}", boxed_write.err().unwrap());
+        return Err(message)
     }
+    Ok(())
 }
 
 fn generate_passphrase() -> String {
