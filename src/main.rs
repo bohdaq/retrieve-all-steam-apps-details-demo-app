@@ -2,6 +2,7 @@ use std::fs::{File, OpenOptions, read_to_string};
 use std::path::Path;
 use std::{fs, thread, time};
 use std::io::{Read, Write};
+use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
 
 // How to use: 1. First step is to import crate functions.
@@ -268,7 +269,9 @@ fn get_or_create_passphrase() -> Result<String, String> {
         Ok(passphrase)
     } else {
         create_file(passphrase_path);
-        Ok("passphrase".to_string())
+        let passphrase = generate_passphrase();
+        write_file(passphrase_path, passphrase.as_bytes());
+        Ok(passphrase)
     }
 
 }
@@ -333,4 +336,11 @@ fn overwrite_file(path: &str, file_content: &[u8]) {
     if boxed_write.is_err() {
         println!("unable to overwrite to file: {}", boxed_write.err().unwrap());
     }
+}
+
+fn generate_passphrase() -> String {
+    let now = SystemTime::now();
+    let time_in_millis = now.duration_since(UNIX_EPOCH).unwrap().as_nanos();
+    let hex_time_in_millis = format!("{time_in_millis:X}");
+    hex_time_in_millis
 }
