@@ -306,3 +306,31 @@ fn read_file(path: &str) -> String {
 
     file_contents
 }
+
+fn write_file(path: &str, file_content: &[u8]) {
+    let mut file = OpenOptions::new()
+        .read(false)
+        .write(true)
+        .create(false)
+        .truncate(false)
+        .open(path)
+        .unwrap();
+    let boxed_write = file.write_all(file_content);
+    if boxed_write.is_err() {
+        println!("unable to write to file: {}", boxed_write.err().unwrap());
+    }
+}
+
+fn overwrite_file(path: &str, file_content: &[u8]) {
+    let mut file = OpenOptions::new()
+        .read(false)
+        .write(true)
+        .create(false)
+        .truncate(true)
+        .open(path)
+        .unwrap();
+    let boxed_write = file.write_all(file_content);
+    if boxed_write.is_err() {
+        println!("unable to overwrite to file: {}", boxed_write.err().unwrap());
+    }
+}
