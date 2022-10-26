@@ -58,6 +58,7 @@ fn do_job() {
                     //retry after backup restore
                     do_job();
                 }
+                do_backup();
             } else {
                 println!("unable to deserialize processed app list");
                 do_restore_from_backup();
