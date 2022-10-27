@@ -4,4 +4,3 @@ Cargo.lock
 /steam-webapi-cache
 /target
 .idea
-/test/encryption_parameters/*
