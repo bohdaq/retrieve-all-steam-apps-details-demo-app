@@ -8,6 +8,9 @@ use openssl::rsa::{Padding};
 use openssl::rsa::Rsa;
 use openssl::symm::Cipher;
 
+#[cfg(test)]
+mod tests;
+
 pub const RSA_SIZE: u32 = 4096;
 
 pub struct EncryptionParameters {
