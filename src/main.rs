@@ -263,6 +263,11 @@ fn setup_encryption() -> Result<(), String> {
         return Err(boxed_passphrase.err().unwrap());
     }
 
+    let boxed_keys = get_or_create_private_public_keys();
+    if boxed_keys.is_err() {
+        return Err(boxed_keys.err().unwrap());
+    }
+
     Ok(())
 }
 
@@ -390,4 +395,8 @@ fn generate_passphrase() -> Result<String, String> {
     let hex_time_in_millis = format!("{time_in_nanos:X}");
     let sha_timestamp = digest(hex_time_in_millis);
     Ok(sha_timestamp)
+}
+
+fn get_or_create_private_public_keys() -> Result<(String, String), String> {
+    Ok(("private".to_string(), "public".to_string()))
 }
