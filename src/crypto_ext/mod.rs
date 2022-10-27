@@ -23,7 +23,8 @@ pub struct EncryptionParameters {
 }
 
 fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<EncryptionParameters, String> {
-    let boxed_passphrase_path = get_static_filepath(".passphrase");
+    let relative_path = get_path_relative_to_working_directory(path_to_encryption_parameters, ".passphrase");
+    let boxed_passphrase_path = get_static_filepath(relative_path.as_str());
     if boxed_passphrase_path.is_err() {
         return Err(boxed_passphrase_path.err().unwrap());
     }
@@ -36,14 +37,16 @@ fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<Encry
     let passphrase = boxed_passphrase.unwrap();
 
 
-    let boxed_public_key_path = get_static_filepath(".public_key");
+    let relative_path = get_path_relative_to_working_directory(path_to_encryption_parameters, ".public_key");
+    let boxed_public_key_path = get_static_filepath(relative_path.as_str());
     if boxed_public_key_path.is_err() {
         return Err(boxed_public_key_path.err().unwrap());
     }
     let public_key_path = boxed_public_key_path.unwrap();
 
 
-    let boxed_private_key_path = get_static_filepath(".private_key");
+    let relative_path = get_path_relative_to_working_directory(path_to_encryption_parameters, ".private_key");
+    let boxed_private_key_path = get_static_filepath(relative_path.as_str());
     if boxed_private_key_path.is_err() {
         return Err(boxed_private_key_path.err().unwrap());
     }
@@ -268,4 +271,13 @@ pub fn get_static_filepath(path: &str) -> Result<String, String> {
     let working_directory = boxed_working_directory.unwrap();
     let absolute_path = [working_directory, path].join("");
     Ok(absolute_path)
+}
+
+fn get_path_relative_to_working_directory(boxed_path_to_encryption_parameters: Option<&str>, filename: &str) -> String {
+    if boxed_path_to_encryption_parameters.is_some() {
+        let path_to_encryption_parameters = boxed_path_to_encryption_parameters.unwrap();
+        return [path_to_encryption_parameters, filename].join("");
+    }
+
+    filename.to_string()
 }
