@@ -37,6 +37,13 @@ fn encrypt(public_key: &str, data: &[u8]) -> Vec<u8> {
     buffer
 }
 
+fn decrypt(private_key: &str, passphrase: &str, data: &[u8]) -> Vec<u8> {
+    let rsa = Rsa::private_key_from_pem_passphrase(private_key.as_bytes(), passphrase.as_bytes()).unwrap();
+    let mut buffer: Vec<u8> = vec![0; RSA_SIZE as usize];
+    let _ = rsa.private_decrypt(data, &mut buffer, Padding::PKCS1_OAEP).unwrap();
+    buffer
+}
+
 fn get_or_create_passphrase(path: &str) -> Result<String, String> {
 
     let boxed_passphrase = generate_passphrase();
