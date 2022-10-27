@@ -33,9 +33,22 @@ fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<Encry
     }
     let passphrase = boxed_passphrase.unwrap();
 
-    let public_key_path = ".public_key";
-    let private_key_path = ".private_key";
-    let boxed_keys = get_or_create_private_public_keys(passphrase.as_str(), public_key_path, private_key_path);
+
+    let boxed_public_key_path = get_static_filepath(".public_key");
+    if boxed_public_key_path.is_err() {
+        return Err(boxed_public_key_path.err().unwrap());
+    }
+    let public_key_path = boxed_public_key_path.unwrap();
+
+
+    let boxed_private_key_path = get_static_filepath(".private_key");
+    if boxed_private_key_path.is_err() {
+        return Err(boxed_private_key_path.err().unwrap());
+    }
+    let private_key_path = boxed_private_key_path.unwrap();
+
+
+    let boxed_keys = get_or_create_private_public_keys(passphrase.as_str(), public_key_path.as_str(), private_key_path.as_str());
     if boxed_keys.is_err() {
         return Err(boxed_keys.err().unwrap());
     }
