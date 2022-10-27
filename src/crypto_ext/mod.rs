@@ -23,6 +23,8 @@ fn setup_encryption() -> Result<(), String> {
         return Err(boxed_keys.err().unwrap());
     }
 
+    let (private_key, public_key) = boxed_keys.unwrap();
+
     Ok(())
 }
 
