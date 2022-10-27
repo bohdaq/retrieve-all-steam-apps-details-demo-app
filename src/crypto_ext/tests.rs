@@ -2,8 +2,6 @@ use crate::crypto_ext::{decrypt, encrypt, setup_encryption};
 
 extern crate openssl;
 
-use openssl::rsa::{Rsa, Padding};
-
 #[test]
 fn encryption() {
     let params = setup_encryption(Some("/test/encryption_parameters/")).unwrap();
