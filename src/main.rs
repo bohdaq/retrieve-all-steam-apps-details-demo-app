@@ -4,7 +4,6 @@ use std::fs::{File, OpenOptions, read_to_string};
 use std::path::Path;
 use std::{fs, thread, time};
 use std::io::{Read, Write};
-use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
 
 // How to use: 1. First step is to import crate functions.
@@ -74,7 +73,7 @@ fn do_job() {
 
     println!("Filtering already processed app details. This may take a while...");
     let mut iteration = 0;
-    let mut app_list : Vec<SteamApp> = get_steam_app_list();
+    let app_list : Vec<SteamApp> = get_steam_app_list();
     let app_list_path_sha_256 = [get_cache_dir_path(), "/".to_string(), "ISteamApps-GetAppList-v2.json.sha256".to_string()].join("");
     let list_as_string: String = format!("{:?}", &app_list);
     let list_as_u8 : &[u8] = list_as_string.as_bytes();
@@ -108,7 +107,7 @@ fn do_job() {
         println!("\n\n Iteration number: {} \n App List size:    {}  {}%  After filtering: {}", iteration_number, app_list_size, calculated_percentage, filtered_list_len);
         retrieve_detailed_app_info(app.appid);
         iteration_number = iteration_number + 1;
-        &processed_app_id_list.push(app.appid);
+        let _ = &processed_app_id_list.push(app.appid);
 
         let serialized_list = serde_json::to_string(&processed_app_id_list).unwrap();
         file.write_all(serialized_list.as_ref()).unwrap();
@@ -247,7 +246,7 @@ fn write_sha256(path: &String, data: &[u8]) -> String {
 }
 
 fn get_steam_app_list() -> Vec<SteamApp> {
-    let mut app_list : Vec<SteamApp>;
+    let app_list : Vec<SteamApp>;
     let boxed_cached_app_list = get_cached_app_list();
     if boxed_cached_app_list.is_ok() {
         app_list = boxed_cached_app_list.unwrap();
