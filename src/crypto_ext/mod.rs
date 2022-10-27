@@ -4,7 +4,7 @@ use std::io::{Read, Write};
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
-use openssl::rsa::{Padding, RsaPrivateKeyBuilder};
+use openssl::rsa::{Padding};
 use openssl::rsa::Rsa;
 use openssl::symm::Cipher;
 
