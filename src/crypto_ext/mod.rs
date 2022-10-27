@@ -18,6 +18,8 @@ pub struct EncryptionParameters {
     pub passphrase: String,
     pub private_key: String,
     pub public_key: String,
+    pub padding: String,
+    pub cipher: String,
 }
 
 fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<EncryptionParameters, String> {
@@ -55,10 +57,15 @@ fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<Encry
 
     let (private_key, public_key) = boxed_keys.unwrap();
 
+    let padding = "PKCS1_OAEP".to_string();
+    let cipher = "chacha20_poly1305".to_string();
+
     let params = EncryptionParameters {
         passphrase,
         private_key,
-        public_key
+        public_key,
+        padding,
+        cipher,
     };
 
     Ok(params)
