@@ -1,3 +1,4 @@
+use std::env;
 use std::fmt::format;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
@@ -20,8 +21,13 @@ pub struct EncryptionParameters {
 }
 
 fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<EncryptionParameters, String> {
-    let passphrase_path = ".passphrase";
-    let boxed_passphrase = get_or_create_passphrase(passphrase_path);
+    let boxed_passphrase_path = get_static_filepath(".passphrase");
+    if boxed_passphrase_path.is_err() {
+        return Err(boxed_passphrase_path.err().unwrap());
+    }
+    let passphrase_path = boxed_passphrase_path.unwrap();
+
+    let boxed_passphrase = get_or_create_passphrase(passphrase_path.as_str());
     if boxed_passphrase.is_err() {
         return Err(boxed_passphrase.err().unwrap());
     }
@@ -220,4 +226,26 @@ fn get_or_create_private_public_keys(passphrase: &str, public_key_path: &str, pr
     let public_key = boxed_public_key.unwrap();
 
     Ok((private_key.to_string(), public_key.to_string()))
+}
+
+pub fn get_static_filepath(path: &str) -> Result<String, String> {
+    let boxed_dir = env::current_dir();
+    if boxed_dir.is_err() {
+        let error = boxed_dir.err().unwrap();
+        eprintln!("{}", error);
+        return Err(error.to_string());
+    }
+    let dir = boxed_dir.unwrap();
+
+
+    let boxed_working_directory = dir.as_path().to_str();
+    if boxed_working_directory.is_none() {
+        let error = "working directory is not set";
+        eprintln!("{}", error);
+        return Err(error.to_string());
+    }
+
+    let working_directory = boxed_working_directory.unwrap();
+    let absolute_path = [working_directory, path].join("");
+    Ok(absolute_path)
 }
