@@ -8,6 +8,8 @@ use openssl::rsa::{Padding, RsaPrivateKeyBuilder};
 use openssl::rsa::Rsa;
 use openssl::symm::Cipher;
 
+pub const RSA_SIZE: u32 = 4096;
+
 fn setup_encryption() -> Result<(), String> {
     let passphrase_path = ".passphrase";
     let boxed_passphrase = get_or_create_passphrase(passphrase_path);
@@ -26,6 +28,13 @@ fn setup_encryption() -> Result<(), String> {
     let (private_key, public_key) = boxed_keys.unwrap();
 
     Ok(())
+}
+
+fn encrypt(public_key: &str, data: &[u8]) -> Vec<u8> {
+    let rsa = Rsa::public_key_from_pem(public_key.as_bytes()).unwrap();
+    let mut buffer : Vec<u8> = vec![0; RSA_SIZE as usize];
+    let _ = rsa.public_encrypt(data, &mut buffer, Padding::PKCS1_OAEP).unwrap();
+    buffer
 }
 
 fn get_or_create_passphrase(path: &str) -> Result<String, String> {
@@ -165,8 +174,7 @@ fn generate_passphrase() -> Result<String, String> {
 }
 
 fn get_or_create_private_public_keys(passphrase: String, public_key_path: &str, private_key_path: &str) -> Result<(String, String), String> {
-    let rsa_size = 4096;
-    let rsa = Rsa::generate(rsa_size).unwrap();
+    let rsa = Rsa::generate(RSA_SIZE).unwrap();
 
     let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::chacha20_poly1305(), passphrase.as_bytes());
     let private_key  = String::from_utf8(boxed_private_key.unwrap()).unwrap();
