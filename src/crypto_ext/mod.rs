@@ -134,12 +134,7 @@ fn read_or_create_and_write(path: &str, content: &str) -> Result<String, String>
 }
 
 fn create_file(path: &str) -> Result<File, String>  {
-    let boxed_file = OpenOptions::new()
-        .read(false)
-        .write(false)
-        .create(true)
-        .truncate(false)
-        .open(path);
+    let boxed_file = File::create(path);
 
     if boxed_file.is_err() {
         let message = format!("unable to create file: {}", boxed_file.err().unwrap());
