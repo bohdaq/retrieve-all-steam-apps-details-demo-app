@@ -1,6 +1,18 @@
-use crate::crypto_ext::setup_encryption;
+use crate::crypto_ext::{decrypt, encrypt, setup_encryption};
+
+extern crate openssl;
+
+use openssl::rsa::{Rsa, Padding};
 
 #[test]
 fn encryption() {
     let params = setup_encryption(Some("/test/encryption_parameters/")).unwrap();
+    let data = "Some random text";
+    let encrypted_u8 = encrypt(params.public_key.as_str(), data.as_bytes());
+
+    let decrypted_u8 = decrypt(params.private_key.as_str(), params.passphrase.as_str(), encrypted_u8.as_ref());
+
+    let decrypted = String::from_utf8(decrypted_u8).unwrap();
+
+    assert_eq!(data.to_string(), decrypted.replace('\0', ""));
 }

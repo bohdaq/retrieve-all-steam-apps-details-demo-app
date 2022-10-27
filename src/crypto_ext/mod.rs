@@ -12,7 +12,7 @@ use openssl::symm::Cipher;
 #[cfg(test)]
 mod tests;
 
-pub const RSA_SIZE: u32 = 4096;
+pub const RSA_SIZE: u32 = 1024;
 
 pub struct EncryptionParameters {
     pub passphrase: String,
@@ -60,8 +60,8 @@ fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<Encry
 
     let (private_key, public_key) = boxed_keys.unwrap();
 
-    let padding = "PKCS1_OAEP".to_string();
-    let cipher = "chacha20_poly1305".to_string();
+    let padding = "PKCS1".to_string();
+    let cipher = "aes_128_cbc".to_string();
 
     let params = EncryptionParameters {
         passphrase,
@@ -76,15 +76,15 @@ fn setup_encryption(path_to_encryption_parameters: Option<&str>) -> Result<Encry
 
 fn encrypt(public_key: &str, data: &[u8]) -> Vec<u8> {
     let rsa = Rsa::public_key_from_pem(public_key.as_bytes()).unwrap();
-    let mut buffer : Vec<u8> = vec![0; RSA_SIZE as usize];
-    let _ = rsa.public_encrypt(data, &mut buffer, Padding::PKCS1_OAEP).unwrap();
+    let mut buffer : Vec<u8> = vec![0; rsa.size() as usize];
+    let _ = rsa.public_encrypt(data, &mut buffer, Padding::PKCS1).unwrap();
     buffer
 }
 
 fn decrypt(private_key: &str, passphrase: &str, data: &[u8]) -> Vec<u8> {
     let rsa = Rsa::private_key_from_pem_passphrase(private_key.as_bytes(), passphrase.as_bytes()).unwrap();
-    let mut buffer: Vec<u8> = vec![0; RSA_SIZE as usize];
-    let _ = rsa.private_decrypt(data, &mut buffer, Padding::PKCS1_OAEP).unwrap();
+    let mut buffer: Vec<u8> = vec![0; rsa.size() as usize];
+    let _ = rsa.private_decrypt(data, &mut buffer, Padding::PKCS1).unwrap();
     buffer
 }
 
@@ -222,7 +222,7 @@ fn generate_passphrase() -> Result<String, String> {
 fn get_or_create_private_public_keys(passphrase: &str, public_key_path: &str, private_key_path: &str) -> Result<(String, String), String> {
     let rsa = Rsa::generate(RSA_SIZE).unwrap();
 
-    let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::chacha20_poly1305(), passphrase.as_bytes());
+    let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::aes_128_cbc(), passphrase.as_bytes());
     let private_key  = String::from_utf8(boxed_private_key.unwrap()).unwrap();
 
     let boxed_private_key = read_or_create_and_write(private_key_path, private_key.as_str());
