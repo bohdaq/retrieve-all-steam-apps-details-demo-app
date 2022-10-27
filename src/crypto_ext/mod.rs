@@ -10,7 +10,13 @@ use openssl::symm::Cipher;
 
 pub const RSA_SIZE: u32 = 4096;
 
-fn setup_encryption() -> Result<(), String> {
+pub struct EncryptionParameters {
+    pub passphrase: String,
+    pub private_key: String,
+    pub public_key: String,
+}
+
+fn setup_encryption() -> Result<EncryptionParameters, String> {
     let passphrase_path = ".passphrase";
     let boxed_passphrase = get_or_create_passphrase(passphrase_path);
     if boxed_passphrase.is_err() {
@@ -20,14 +26,20 @@ fn setup_encryption() -> Result<(), String> {
 
     let public_key_path = ".public_key";
     let private_key_path = ".private_key";
-    let boxed_keys = get_or_create_private_public_keys(passphrase, public_key_path, private_key_path);
+    let boxed_keys = get_or_create_private_public_keys(passphrase.as_str(), public_key_path, private_key_path);
     if boxed_keys.is_err() {
         return Err(boxed_keys.err().unwrap());
     }
 
     let (private_key, public_key) = boxed_keys.unwrap();
 
-    Ok(())
+    let params = EncryptionParameters {
+        passphrase,
+        private_key,
+        public_key
+    };
+
+    Ok(params)
 }
 
 fn encrypt(public_key: &str, data: &[u8]) -> Vec<u8> {
@@ -180,7 +192,7 @@ fn generate_passphrase() -> Result<String, String> {
     Ok(sha_timestamp)
 }
 
-fn get_or_create_private_public_keys(passphrase: String, public_key_path: &str, private_key_path: &str) -> Result<(String, String), String> {
+fn get_or_create_private_public_keys(passphrase: &str, public_key_path: &str, private_key_path: &str) -> Result<(String, String), String> {
     let rsa = Rsa::generate(RSA_SIZE).unwrap();
 
     let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::chacha20_poly1305(), passphrase.as_bytes());
