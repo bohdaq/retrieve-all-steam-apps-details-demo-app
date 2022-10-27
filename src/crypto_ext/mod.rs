@@ -19,38 +19,49 @@ fn setup_encryption() -> Result<(), String> {
 }
 
 fn get_or_create_passphrase() -> Result<String, String> {
+
+    let boxed_passphrase = generate_passphrase();
+    if boxed_passphrase.is_err() {
+        let message = boxed_passphrase.err().unwrap();
+        return Err(message)
+    }
+
+    let passphrase = boxed_passphrase.unwrap();
     let passphrase_path = ".passphrase";
 
-    let does_passphrase_exist = does_file_exist(passphrase_path);
+    let boxed_passphrase = read_or_create_and_write(passphrase_path, passphrase.as_str());
+    if boxed_passphrase.is_err() {
+        let message = boxed_passphrase.err().unwrap();
+        return Err(message)
+    }
+
+    let passphrase = boxed_passphrase.unwrap();
+    Ok(passphrase)
+}
+
+fn read_or_create_and_write(path: &str, content: &str) -> Result<String, String> {
+    let does_passphrase_exist = does_file_exist(path);
     return if does_passphrase_exist {
-        let boxed_read = read_file(passphrase_path);
+        let boxed_read = read_file(path);
         if boxed_read.is_err() {
             return Err(boxed_read.err().unwrap());
         }
         let passphrase = boxed_read.unwrap();
         Ok(passphrase)
     } else {
-        let boxed_create = create_file(passphrase_path);
+        let boxed_create = create_file(path);
         if boxed_create.is_err() {
             let message = boxed_create.err().unwrap();
             return Err(message)
         }
 
-        let boxed_passphrase = generate_passphrase();
-        if boxed_passphrase.is_err() {
-            let message = boxed_passphrase.err().unwrap();
-            return Err(message)
-        }
-        let passphrase = boxed_passphrase.unwrap();
-
-        let boxed_write = write_file(passphrase_path, passphrase.as_bytes());
+        let boxed_write = write_file(path, content.as_bytes());
         if boxed_write.is_err() {
             let message = boxed_write.err().unwrap();
             return Err(message)
         }
-        Ok(passphrase)
+        Ok(content.to_string())
     }
-
 }
 
 fn create_file(path: &str) -> Result<File, String>  {
