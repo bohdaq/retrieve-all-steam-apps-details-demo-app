@@ -3,7 +3,6 @@ mod crypto_ext;
 use std::fs::{File, OpenOptions, read_to_string};
 use std::path::Path;
 use std::{fs, thread, time};
-use std::f32::consts::E;
 use std::io::{Read, Write};
 use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
