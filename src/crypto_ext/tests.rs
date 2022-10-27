@@ -8,9 +8,9 @@ use openssl::rsa::{Rsa, Padding};
 fn encryption() {
     let params = setup_encryption(Some("/test/encryption_parameters/")).unwrap();
 
-    //maximum 117 bytes at once to be encrypted
-    let data = "Some random textSome random textSome random textSome random textSome random textSome random textSome random textSomee";
-    println!("data len: {}", data.len());
+    //maximum 501 bytes at once to be encrypted
+    let data = "Some random textSome random textSome random textSome random textSome random textSome random textSome random textSomeeSome random textSome random textSome random textSome random textSome random textSome random textSome random textSomeeSome random textSome random textSome random textSome random textSome random textSome random textSome random textSomeeSome random textSome random textSome random textSome random textSome random textSome random textSome random textSomee123textSomee123textSomee123textSo";
+    println!("data len: {}", data.as_bytes().len());
     let encrypted_u8 = encrypt(params.public_key.as_str(), data.as_bytes());
 
     let decrypted_u8 = decrypt(params.private_key.as_str(), params.passphrase.as_str(), encrypted_u8.as_ref());
