@@ -7,7 +7,8 @@ use openssl::rsa::{Rsa, Padding};
 #[test]
 fn encryption() {
     let params = setup_encryption(Some("/test/encryption_parameters/")).unwrap();
-    let data = "Some random text";
+    let data = "Some random textSome random textSome random textSome random textSome random textSome random textSome random textSomee";
+    println!("data len: {}", data.len());
     let encrypted_u8 = encrypt(params.public_key.as_str(), data.as_bytes());
 
     let decrypted_u8 = decrypt(params.private_key.as_str(), params.passphrase.as_str(), encrypted_u8.as_ref());
