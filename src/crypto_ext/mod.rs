@@ -5,7 +5,8 @@ use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
 
 fn setup_encryption() -> Result<(), String> {
-    let boxed_passphrase = get_or_create_passphrase();
+    let passphrase_path = ".passphrase";
+    let boxed_passphrase = get_or_create_passphrase(passphrase_path);
     if boxed_passphrase.is_err() {
         return Err(boxed_passphrase.err().unwrap());
     }
@@ -18,7 +19,7 @@ fn setup_encryption() -> Result<(), String> {
     Ok(())
 }
 
-fn get_or_create_passphrase() -> Result<String, String> {
+fn get_or_create_passphrase(path: &str) -> Result<String, String> {
 
     let boxed_passphrase = generate_passphrase();
     if boxed_passphrase.is_err() {
@@ -27,9 +28,8 @@ fn get_or_create_passphrase() -> Result<String, String> {
     }
 
     let passphrase = boxed_passphrase.unwrap();
-    let passphrase_path = ".passphrase";
 
-    let boxed_passphrase = read_or_create_and_write(passphrase_path, passphrase.as_str());
+    let boxed_passphrase = read_or_create_and_write(path, passphrase.as_str());
     if boxed_passphrase.is_err() {
         let message = boxed_passphrase.err().unwrap();
         return Err(message)
