@@ -1,7 +1,5 @@
 use crate::crypto_ext::{decrypt, encrypt, setup_encryption};
 
-extern crate openssl;
-
 #[test]
 fn encryption() {
     let params = setup_encryption(Some("/test/encryption_parameters/")).unwrap();
