@@ -166,7 +166,7 @@ fn get_or_create_private_public_keys(passphrase: String, public_key_path: &str, 
     let rsa_size = 4096;
     let rsa = Rsa::generate(rsa_size).unwrap();
 
-    let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::aes_256_gcm(), passphrase.as_bytes());
+    let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::chacha20_poly1305(), passphrase.as_bytes());
     let private_key  = String::from_utf8(boxed_private_key.unwrap()).unwrap();
 
     let boxed_private_key = read_or_create_and_write(private_key_path, private_key.as_str());
