@@ -16,7 +16,9 @@ fn setup_encryption() -> Result<(), String> {
     }
     let passphrase = boxed_passphrase.unwrap();
 
-    let boxed_keys = get_or_create_private_public_keys(passphrase);
+    let public_key_path = ".public_key";
+    let private_key_path = ".private_key";
+    let boxed_keys = get_or_create_private_public_keys(passphrase, public_key_path, private_key_path);
     if boxed_keys.is_err() {
         return Err(boxed_keys.err().unwrap());
     }
@@ -160,15 +162,30 @@ fn generate_passphrase() -> Result<String, String> {
     Ok(sha_timestamp)
 }
 
-fn get_or_create_private_public_keys(passphrase: String) -> Result<(String, String), String> {
+fn get_or_create_private_public_keys(passphrase: String, public_key_path: &str, private_key_path: &str) -> Result<(String, String), String> {
     let rsa_size = 4096;
     let rsa = Rsa::generate(rsa_size).unwrap();
 
     let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::aes_256_gcm(), passphrase.as_bytes());
     let private_key  = String::from_utf8(boxed_private_key.unwrap()).unwrap();
 
+    let boxed_private_key = read_or_create_and_write(private_key_path, private_key.as_str());
+    if boxed_private_key.is_err() {
+        let message = boxed_private_key.err().unwrap();
+        return Err(message)
+    }
+    let private_key = boxed_private_key.unwrap();
+
+
     let boxed_public_key = rsa.public_key_to_pem();
     let public_key = String::from_utf8(boxed_public_key.unwrap()).unwrap();
+
+    let boxed_public_key = read_or_create_and_write(public_key_path, public_key.as_str());
+    if boxed_public_key.is_err() {
+        let message = boxed_public_key.err().unwrap();
+        return Err(message)
+    }
+    let public_key = boxed_public_key.unwrap();
 
     Ok((private_key.to_string(), public_key.to_string()))
 }
