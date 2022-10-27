@@ -12,7 +12,7 @@ use openssl::symm::Cipher;
 #[cfg(test)]
 mod tests;
 
-pub const RSA_SIZE: u32 = 1024;
+pub const RSA_SIZE: u32 = 4096;
 
 pub struct EncryptionParameters {
     pub passphrase: String,
