@@ -16,7 +16,7 @@ pub struct EncryptionParameters {
     pub public_key: String,
 }
 
-fn setup_encryption() -> Result<EncryptionParameters, String> {
+fn setup_encryption(path_to_encryption_parameters: &str) -> Result<EncryptionParameters, String> {
     let passphrase_path = ".passphrase";
     let boxed_passphrase = get_or_create_passphrase(passphrase_path);
     if boxed_passphrase.is_err() {
