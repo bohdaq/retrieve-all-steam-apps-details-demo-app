@@ -1,8 +1,12 @@
+use std::fmt::format;
 use std::fs::{File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
+use openssl::rsa::{Padding, RsaPrivateKeyBuilder};
+use openssl::rsa::Rsa;
+use openssl::symm::Cipher;
 
 fn setup_encryption() -> Result<(), String> {
     let passphrase_path = ".passphrase";
@@ -10,8 +14,9 @@ fn setup_encryption() -> Result<(), String> {
     if boxed_passphrase.is_err() {
         return Err(boxed_passphrase.err().unwrap());
     }
+    let passphrase = boxed_passphrase.unwrap();
 
-    let boxed_keys = get_or_create_private_public_keys();
+    let boxed_keys = get_or_create_private_public_keys(passphrase);
     if boxed_keys.is_err() {
         return Err(boxed_keys.err().unwrap());
     }
@@ -155,6 +160,15 @@ fn generate_passphrase() -> Result<String, String> {
     Ok(sha_timestamp)
 }
 
-fn get_or_create_private_public_keys() -> Result<(String, String), String> {
-    Ok(("private".to_string(), "public".to_string()))
+fn get_or_create_private_public_keys(passphrase: String) -> Result<(String, String), String> {
+    let rsa_size = 4096;
+    let rsa = Rsa::generate(rsa_size).unwrap();
+
+    let boxed_private_key = rsa.private_key_to_pem_passphrase(Cipher::aes_256_gcm(), passphrase.as_bytes());
+    let private_key  = String::from_utf8(boxed_private_key.unwrap()).unwrap();
+
+    let boxed_public_key = rsa.public_key_to_pem();
+    let public_key = String::from_utf8(boxed_public_key.unwrap()).unwrap();
+
+    Ok((private_key.to_string(), public_key.to_string()))
 }
