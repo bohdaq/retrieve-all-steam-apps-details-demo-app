@@ -1,5 +1,5 @@
 use crate::crypto_ext::{decrypt, encrypt, setup_encryption, sign, verify};
-use hex::{self, FromHex, ToHex};
+use hex::{self};
 
 #[test]
 fn encryption() {
