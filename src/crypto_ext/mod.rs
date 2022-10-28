@@ -92,7 +92,7 @@ fn decrypt(private_key: &str, passphrase: &str, data: &[u8]) -> Vec<u8> {
     buffer
 }
 
-fn sign(private_key: &str, data: &[u8]) {
+fn sign(private_key: &str, data: &[u8]) -> String {
     let rsa_pkey = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
     let pkey = PKey::from_rsa(rsa_pkey).unwrap();
 
@@ -101,6 +101,7 @@ fn sign(private_key: &str, data: &[u8]) {
     let data_vec = Vec::from_hex(data).unwrap();
     signer.update(&data_vec);
     let result = signer.sign_to_vec().unwrap();
+    hex::encode(result)
 }
 
 fn get_or_create_passphrase(path: &str) -> Result<String, String> {
