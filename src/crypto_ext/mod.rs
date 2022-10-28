@@ -93,22 +93,13 @@ fn decrypt(private_key: &str, passphrase: &str, data: &[u8]) -> Vec<u8> {
 }
 
 fn sign(private_key: &str, passphrase: &str, data: &[u8]) -> String {
-    let rsa_pkey = Rsa::private_key_from_pem_passphrase(private_key.as_bytes(), passphrase.as_bytes()).unwrap();
-    let pkey = PKey::from_rsa(rsa_pkey).unwrap();
-
-    let mut signer = Signer::new(MessageDigest::sha256(), &pkey).unwrap();
-    signer.set_rsa_padding(Padding::PKCS1).unwrap();
-    let data_as_hex = hex::encode(data);
-    signer.update(&Vec::from_hex(data_as_hex).unwrap()).unwrap();
-    let result = signer.sign_to_vec().unwrap();
-    hex::encode(result)
+    //TODO:
+    "".to_string()
 }
 
-fn verify(private_key: &str, passphrase: &str, data: &[u8], signature: &str) -> bool {
-    let actual_signature = sign(private_key, passphrase, data);
-    let result = actual_signature == signature;
-
-    result
+fn verify(public_key: &str, data: &[u8], signature: &str) -> bool {
+    //TODO
+    false
 }
 
 fn get_or_create_passphrase(path: &str) -> Result<String, String> {
