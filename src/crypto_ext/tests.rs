@@ -41,6 +41,7 @@ fn signing() {
 
 #[test]
 fn verification() {
+    // path needs to be accessible by user with write permission for initial setup
     let relative_path_to_working_directory_for_storing_encryption_parameters = "/test/encryption_parameters/";
     // it will read encryption params like public, private keys and passphrase or create them
     let params = setup_encryption(Some(relative_path_to_working_directory_for_storing_encryption_parameters)).unwrap();
