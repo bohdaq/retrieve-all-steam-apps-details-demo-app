@@ -1,3 +1,5 @@
+extern crate core;
+
 mod crypto_ext;
 
 use std::fs::{File, OpenOptions, read_to_string};
