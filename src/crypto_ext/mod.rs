@@ -7,7 +7,7 @@ use sha256::digest;
 use openssl::rsa::Padding;
 use openssl::rsa::Rsa;
 use openssl::symm::Cipher;
-use openssl::sign::{Signer, Verifier};
+use openssl::sign::{Signer};
 use openssl::pkey::PKey;
 use openssl::hash::MessageDigest;
 use hex::{self, FromHex};
@@ -98,9 +98,17 @@ fn sign(private_key: &str, passphrase: &str, data: &[u8]) -> String {
 
     let mut signer = Signer::new(MessageDigest::sha256(), &pkey).unwrap();
     signer.set_rsa_padding(Padding::PKCS1).unwrap();
-    signer.update(&data).unwrap();
+    let data_as_hex = hex::encode(data);
+    signer.update(&Vec::from_hex(data_as_hex).unwrap()).unwrap();
     let result = signer.sign_to_vec().unwrap();
     hex::encode(result)
+}
+
+fn verify(private_key: &str, passphrase: &str, data: &[u8], signature: &str) -> bool {
+    let actual_signature = sign(private_key, passphrase, data);
+    let result = actual_signature == signature;
+
+    result
 }
 
 fn get_or_create_passphrase(path: &str) -> Result<String, String> {
