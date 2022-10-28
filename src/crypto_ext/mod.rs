@@ -4,9 +4,14 @@ use std::io::{Read, Write};
 use std::path::Path;
 use std::time::{SystemTime, UNIX_EPOCH};
 use sha256::digest;
-use openssl::rsa::{Padding};
+use openssl::rsa::Padding;
 use openssl::rsa::Rsa;
 use openssl::symm::Cipher;
+use openssl::sign::{Signer, Verifier};
+use openssl::pkey::PKey;
+use openssl::hash::MessageDigest;
+use hex::{self, FromHex};
+
 
 #[cfg(test)]
 mod tests;
@@ -85,6 +90,17 @@ fn decrypt(private_key: &str, passphrase: &str, data: &[u8]) -> Vec<u8> {
     let mut buffer: Vec<u8> = vec![0; rsa.size() as usize];
     let _ = rsa.private_decrypt(data, &mut buffer, Padding::PKCS1).unwrap();
     buffer
+}
+
+fn sign(private_key: &str, data: &[u8]) {
+    let rsa_pkey = Rsa::private_key_from_pem(private_key.as_bytes()).unwrap();
+    let pkey = PKey::from_rsa(rsa_pkey).unwrap();
+
+    let mut signer = Signer::new(MessageDigest::sha256(), &pkey).unwrap();
+    signer.set_rsa_padding(Padding::PKCS1).unwrap();
+    let data_vec = Vec::from_hex(data).unwrap();
+    signer.update(&data_vec);
+    let result = signer.sign_to_vec().unwrap();
 }
 
 fn get_or_create_passphrase(path: &str) -> Result<String, String> {
